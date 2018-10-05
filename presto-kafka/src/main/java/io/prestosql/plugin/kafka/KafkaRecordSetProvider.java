@@ -13,20 +13,24 @@
  */
 package io.prestosql.plugin.kafka;
 
+//import com.facebook.presto.decoder.DispatchingRowDecoderFactory;
+//import com.facebook.presto.decoder.RowDecoder;
+//import com.facebook.presto.spi.ColumnHandle;
+//import com.facebook.presto.spi.ConnectorSession;
+//import com.facebook.presto.spi.ConnectorSplit;
+//import com.facebook.presto.spi.RecordSet;
+//import com.facebook.presto.spi.connector.ConnectorRecordSetProvider;
+//import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
+
+//import com.facebook.presto.kafka.KafkaConsumerManager;
+//import com.facebook.presto.kafka.KafkaRecordSet;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.prestosql.decoder.DispatchingRowDecoderFactory;
 import io.prestosql.decoder.RowDecoder;
-import io.prestosql.spi.connector.ColumnHandle;
-import io.prestosql.spi.connector.ConnectorRecordSetProvider;
-import io.prestosql.spi.connector.ConnectorSession;
-import io.prestosql.spi.connector.ConnectorSplit;
-import io.prestosql.spi.connector.ConnectorTableHandle;
-import io.prestosql.spi.connector.ConnectorTransactionHandle;
-import io.prestosql.spi.connector.RecordSet;
+import io.prestosql.spi.connector.*;
 
 import javax.inject.Inject;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,21 +39,26 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.prestosql.plugin.kafka.KafkaHandleResolver.convertSplit;
 import static java.util.Objects.requireNonNull;
 
+//import static com.facebook.presto.kafka.KafkaHandleResolver.convertSplit;
+
+/**
+ * Factory for Kafka specific {@link RecordSet} instances.
+ */
 public class KafkaRecordSetProvider
         implements ConnectorRecordSetProvider
 {
-    private final DispatchingRowDecoderFactory decoderFactory;
-    private final KafkaConsumerFactory consumerFactory;
+    private DispatchingRowDecoderFactory decoderFactory;
+    private final KafkaConsumerManager consumerManager;
 
     @Inject
-    public KafkaRecordSetProvider(DispatchingRowDecoderFactory decoderFactory, KafkaConsumerFactory consumerFactory)
+    public KafkaRecordSetProvider(DispatchingRowDecoderFactory decoderFactory, KafkaConsumerManager consumerManager)
     {
         this.decoderFactory = requireNonNull(decoderFactory, "decoderFactory is null");
-        this.consumerFactory = requireNonNull(consumerFactory, "consumerManager is null");
+        this.consumerManager = requireNonNull(consumerManager, "consumerManager is null");
     }
 
-    @Override
-    public RecordSet getRecordSet(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorSplit split, ConnectorTableHandle table, List<? extends ColumnHandle> columns)
+//    @Override
+    public RecordSet getRecordSet(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableHandle table, ConnectorSplit split, List<? extends ColumnHandle> columns)
     {
         KafkaSplit kafkaSplit = convertSplit(split);
 
@@ -73,7 +82,7 @@ public class KafkaRecordSetProvider
                         .filter(col -> !col.isKeyDecoder())
                         .collect(toImmutableSet()));
 
-        return new KafkaRecordSet(kafkaSplit, consumerFactory, kafkaColumns, keyDecoder, messageDecoder);
+        return new KafkaRecordSet(kafkaSplit, consumerManager, kafkaColumns, keyDecoder, messageDecoder);
     }
 
     private Map<String, String> getDecoderParameters(Optional<String> dataSchema)

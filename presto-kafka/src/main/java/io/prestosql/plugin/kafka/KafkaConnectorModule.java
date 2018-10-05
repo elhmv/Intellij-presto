@@ -36,22 +36,26 @@ import static io.airlift.json.JsonBinder.jsonBinder;
 import static io.airlift.json.JsonCodecBinder.jsonCodecBinder;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Guice module for the Apache Kafka connector.
+ */
 public class KafkaConnectorModule
         implements Module
 {
     @Override
     public void configure(Binder binder)
     {
+        binder.bind(KafkaConnector.class).in(Scopes.SINGLETON);
+
         binder.bind(ConnectorMetadata.class).to(KafkaMetadata.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorSplitManager.class).annotatedWith(ForClassLoaderSafe.class).to(KafkaSplitManager.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorSplitManager.class).to(ClassLoaderSafeConnectorSplitManager.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorRecordSetProvider.class).annotatedWith(ForClassLoaderSafe.class).to(KafkaRecordSetProvider.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorRecordSetProvider.class).to(ClassLoaderSafeConnectorRecordSetProvider.class).in(Scopes.SINGLETON);
-        binder.bind(KafkaConnector.class).in(Scopes.SINGLETON);
 
-        binder.bind(KafkaConsumerFactory.class).in(Scopes.SINGLETON);
+        binder.bind(KafkaConsumerManager.class).in(Scopes.SINGLETON);
 
-        configBinder(binder).bindConfig(KafkaConfig.class);
+        configBinder(binder).bindConfig(KafkaConnectorConfig.class);
 
         jsonBinder(binder).addDeserializerBinding(Type.class).to(TypeDeserializer.class);
         jsonCodecBinder(binder).bindJsonCodec(KafkaTopicDescription.class);
@@ -59,7 +63,7 @@ public class KafkaConnectorModule
         binder.install(new DecoderModule());
     }
 
-    private static final class TypeDeserializer
+    public static final class TypeDeserializer
             extends FromStringDeserializer<Type>
     {
         private static final long serialVersionUID = 1L;

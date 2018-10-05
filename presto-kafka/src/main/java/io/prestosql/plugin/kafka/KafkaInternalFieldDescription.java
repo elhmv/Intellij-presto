@@ -13,10 +13,15 @@
  */
 package io.prestosql.plugin.kafka;
 
+//import com.facebook.presto.spi.ColumnMetadata;
+//import com.facebook.presto.spi.type.BigintType;
+//import com.facebook.presto.spi.type.BooleanType;
+//import com.facebook.presto.spi.type.SmallintType;
+//import com.facebook.presto.spi.type.TimestampType;
+//import com.facebook.presto.spi.type.Type;
+
 import io.prestosql.spi.connector.ColumnMetadata;
-import io.prestosql.spi.type.BigintType;
-import io.prestosql.spi.type.BooleanType;
-import io.prestosql.spi.type.Type;
+import io.prestosql.spi.type.*;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,16 +29,18 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
-import static io.prestosql.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
+
+//import static com.facebook.presto.spi.type.VarcharType.createUnboundedVarcharType;
+import static io.prestosql.spi.type.VarcharType.createUnboundedVarcharType;
 
 /**
  * Describes an internal (managed by the connector) field which is added to each table row. The definition itself makes the row
  * show up in the tables (the columns are hidden by default, so they must be explicitly selected) but unless the field is hooked in using the
  * forBooleanValue/forLongValue/forBytesValue methods and the resulting FieldValueProvider is then passed into the appropriate row decoder, the fields
- * will be null. Most values are assigned in the {@link io.prestosql.plugin.kafka.KafkaRecordSet}.
+ * will be null. Most values are assigned in the {@link com.facebook.presto.kafka.KafkaRecordSet}.
  */
 public enum KafkaInternalFieldDescription
 {
@@ -46,6 +53,21 @@ public enum KafkaInternalFieldDescription
      * <tt>_partition_offset</tt> - The current offset of the message in the partition.
      */
     PARTITION_OFFSET_FIELD("_partition_offset", BigintType.BIGINT, "Offset for the message within the partition"),
+
+    /**
+     * <tt>_segment_start</tt> - Kafka start offset for the segment which contains the current message. This is per-partition.
+     */
+    SEGMENT_START_FIELD("_segment_start", BigintType.BIGINT, "Segment start offset"),
+
+    /**
+     * <tt>_segment_end</tt> - Kafka end offset for the segment which contains the current message. This is per-partition. The end offset is the first offset that is *not* in the segment.
+     */
+    SEGMENT_END_FIELD("_segment_end", BigintType.BIGINT, "Segment end offset"),
+
+    /**
+     * <tt>_segment_count</tt> - Running count of messages in a segment.
+     */
+    SEGMENT_COUNT_FIELD("_segment_count", BigintType.BIGINT, "Running message count per segment"),
 
     /**
      * <tt>_message_corrupt</tt> - True if the row converter could not read the a message. May be null if the row converter does not set a value (e.g. the dummy row converter does not).
@@ -75,7 +97,17 @@ public enum KafkaInternalFieldDescription
     /**
      * <tt>_key_length</tt> - length in bytes of the key.
      */
-    KEY_LENGTH_FIELD("_key_length", BigintType.BIGINT, "Total number of key bytes");
+    KEY_LENGTH_FIELD("_key_length", BigintType.BIGINT, "Total number of key bytes"),
+
+    /**
+     * <tt>_message_timestamp</tt> - Message Timestamp.
+     */
+    MESSAGE_TIMESTAMP_FIELD("_message_timestamp", TimestampType.TIMESTAMP, "Message Timestamp"),
+
+    /**
+     * <tt>_message_timestamp</tt> - Message Timestamp Type.
+     */
+    MESSAGE_TIMESTAMP_TYPE_FIELD("_message_timestamp_type", SmallintType.SMALLINT, "Message Timestamp Type");
 
     private static final Map<String, KafkaInternalFieldDescription> BY_COLUMN_NAME =
             stream(KafkaInternalFieldDescription.values())
@@ -108,7 +140,7 @@ public enum KafkaInternalFieldDescription
         return columnName;
     }
 
-    private Type getType()
+    public Type getType()
     {
         return type;
     }

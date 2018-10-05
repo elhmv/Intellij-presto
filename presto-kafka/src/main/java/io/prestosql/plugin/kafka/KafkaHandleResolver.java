@@ -56,14 +56,14 @@ public class KafkaHandleResolver
         return (KafkaTableHandle) tableHandle;
     }
 
-    static KafkaColumnHandle convertColumnHandle(ColumnHandle columnHandle)
+    public static KafkaColumnHandle convertColumnHandle(ColumnHandle columnHandle)
     {
         requireNonNull(columnHandle, "columnHandle is null");
         checkArgument(columnHandle instanceof KafkaColumnHandle, "columnHandle is not an instance of KafkaColumnHandle");
         return (KafkaColumnHandle) columnHandle;
     }
 
-    static KafkaSplit convertSplit(ConnectorSplit split)
+    public static KafkaSplit convertSplit(ConnectorSplit split)
     {
         requireNonNull(split, "split is null");
         checkArgument(split instanceof KafkaSplit, "split is not an instance of KafkaSplit");

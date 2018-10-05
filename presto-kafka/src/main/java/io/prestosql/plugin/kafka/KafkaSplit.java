@@ -58,6 +58,17 @@ public class KafkaSplit
         this.leader = requireNonNull(leader, "leader is null");
     }
 
+    public <T> KafkaSplit(String connectorId, String topic, String keyDataFormat, String messageDataFormat, Optional<T> empty, Optional<T> empty1, int partition, long start, long end, HostAddress fromParts, String topicName, String keyDataFormat1, String messageDataFormat1, Optional<String> keyDataSchemaContents, Optional<String> messageDataSchemaContents, int partitionId, Range messagesRange, HostAddress leader) {
+        this.topicName = topicName;
+        this.keyDataFormat = keyDataFormat1;
+        this.messageDataFormat = messageDataFormat1;
+        this.keyDataSchemaContents = keyDataSchemaContents;
+        this.messageDataSchemaContents = messageDataSchemaContents;
+        this.partitionId = partitionId;
+        this.messagesRange = messagesRange;
+        this.leader = leader;
+    }
+
     @JsonProperty
     public String getTopicName()
     {

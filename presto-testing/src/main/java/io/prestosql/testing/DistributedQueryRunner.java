@@ -93,7 +93,7 @@ public class DistributedQueryRunner
         return new Builder(defaultSession);
     }
 
-    private DistributedQueryRunner(
+    public DistributedQueryRunner(
             Session defaultSession,
             int nodeCount,
             Map<String, String> extraProperties,
