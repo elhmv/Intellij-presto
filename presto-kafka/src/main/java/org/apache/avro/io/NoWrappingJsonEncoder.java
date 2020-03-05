@@ -13,9 +13,10 @@
  */
 package org.apache.avro.io;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.avro.Schema;
 import org.apache.avro.io.parsing.Symbol;
-import org.codehaus.jackson.JsonGenerator;
+
 
 import java.io.IOException;
 import java.io.OutputStream;
