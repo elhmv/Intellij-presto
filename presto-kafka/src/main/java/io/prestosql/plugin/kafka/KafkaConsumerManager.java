@@ -24,6 +24,7 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 import javax.inject.Inject;
+
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -42,7 +43,7 @@ public class KafkaConsumerManager
     private static final String byteArrayDeserializer = ByteArrayDeserializer.class.getName();
     private static final String kafkaAvroDeserializer = KafkaAvroDeserializer.class.getName();
 
-    private final String connectorId;
+//    private final String connectorId;
     private final NodeManager nodeManager;
     private final int sessionTimeoutMs;
     private final int maxPartitionFetchBytes;
@@ -58,11 +59,11 @@ public class KafkaConsumerManager
 
     @Inject
     public KafkaConsumerManager(
-            String connectorId,
+//            String connectorId,
             KafkaConnectorConfig kafkaConnectorConfig,
             NodeManager nodeManager)
     {
-        this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
+//        this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
         this.nodeManager = requireNonNull(nodeManager, "nodeManager is null");
         requireNonNull(kafkaConnectorConfig, "kafkaConfig is null");
         this.sessionTimeoutMs = kafkaConnectorConfig.getSessionTimeoutMs();
@@ -94,7 +95,7 @@ public class KafkaConsumerManager
             Thread.currentThread().setContextClassLoader(null);
             Properties prop = new Properties();
             prop.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, newBootstrapServers);
-            prop.put(ConsumerConfig.GROUP_ID_CONFIG, connectorId + "-presto");
+            prop.put(ConsumerConfig.GROUP_ID_CONFIG, nodeManager.getCurrentNode().getNodeIdentifier() + "-presto");
             prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, String.valueOf(autoCommit));
             prop.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeoutMs);
             prop.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, maxPartitionFetchBytes);
@@ -106,7 +107,7 @@ public class KafkaConsumerManager
                 prop.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, byteArrayDeserializer);
             }
             prop.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            prop.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer_" + connectorId + "_" + nodeManager.getCurrentNode().getNodeIdentifier()
+            prop.put(ConsumerConfig.CLIENT_ID_CONFIG, "consumer_" + nodeManager.getCurrentNode().getNodeIdentifier()
                     + "_" + ThreadLocalRandom.current().nextInt() + "_" + System.currentTimeMillis());
             prop.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, securityProtocol);
             prop.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, trustStoreLocation);

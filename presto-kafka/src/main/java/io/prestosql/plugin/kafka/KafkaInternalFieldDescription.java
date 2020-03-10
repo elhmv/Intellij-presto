@@ -13,15 +13,12 @@
  */
 package io.prestosql.plugin.kafka;
 
-//import com.facebook.presto.spi.ColumnMetadata;
-//import com.facebook.presto.spi.type.BigintType;
-//import com.facebook.presto.spi.type.BooleanType;
-//import com.facebook.presto.spi.type.SmallintType;
-//import com.facebook.presto.spi.type.TimestampType;
-//import com.facebook.presto.spi.type.Type;
-
 import io.prestosql.spi.connector.ColumnMetadata;
-import io.prestosql.spi.type.*;
+import io.prestosql.spi.type.BigintType;
+import io.prestosql.spi.type.BooleanType;
+import io.prestosql.spi.type.SmallintType;
+import io.prestosql.spi.type.TimestampType;
+import io.prestosql.spi.type.Type;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,12 +26,10 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static io.prestosql.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
-
-//import static com.facebook.presto.spi.type.VarcharType.createUnboundedVarcharType;
-import static io.prestosql.spi.type.VarcharType.createUnboundedVarcharType;
 
 /**
  * Describes an internal (managed by the connector) field which is added to each table row. The definition itself makes the row

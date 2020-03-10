@@ -19,11 +19,15 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
+import io.airlift.units.DataSize;
+import io.airlift.units.Duration;
+import io.airlift.units.MinDuration;
 import io.prestosql.spi.HostAddress;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
 import java.io.File;
 import java.util.Set;
 
@@ -83,6 +87,9 @@ public class KafkaConnectorConfig
     private String keyStoreLocation = "";
     private String keyStorePassword = "";
     private String keyPassword = "";
+
+    private Duration kafkaConnectTimeout = Duration.valueOf("10s");
+    private DataSize kafkaBufferSize = DataSize.of(64, DataSize.Unit.KILOBYTE);
 
     private boolean autoCommit = true;
 
@@ -260,6 +267,33 @@ public class KafkaConnectorConfig
         return keyPassword;
     }
 
+    @MinDuration("1s")
+    public Duration getKafkaConnectTimeout()
+    {
+        return kafkaConnectTimeout;
+    }
+
+    @Config("kafka.connect-timeout")
+    @ConfigDescription("Kafka connection timeout")
+    public KafkaConnectorConfig setKafkaConnectTimeout(String kafkaConnectTimeout)
+    {
+        this.kafkaConnectTimeout = Duration.valueOf(kafkaConnectTimeout);
+        return this;
+    }
+
+    public DataSize getKafkaBufferSize()
+    {
+        return kafkaBufferSize;
+    }
+
+    @Config("kafka.buffer-size")
+    @ConfigDescription("Kafka message consumer buffer size")
+    public KafkaConnectorConfig setKafkaBufferSize(String kafkaBufferSize)
+    {
+        this.kafkaBufferSize = DataSize.valueOf(kafkaBufferSize);
+        return this;
+    }
+
     @Config("kafka.auto-commit")
     public KafkaConnectorConfig setAutoCommit(boolean autoCommit)
     {
@@ -284,7 +318,8 @@ public class KafkaConnectorConfig
         return schemaRegistryUrl;
     }
 
-    public int getMessagesPerSplit() {
+    public int getMessagesPerSplit()
+    {
         return messagesPerSplit;
     }
 

@@ -29,7 +29,7 @@ public final class KafkaTableHandle
 {
     /**
      * The schema name for this table. Is set through configuration and read
-     * using {@link KafkaConfig#getDefaultSchema()}. Usually 'default'.
+     * using {@link KafkaConnectorConfig#getDefaultSchema()}. Usually 'default'.
      */
     private final String schemaName;
 

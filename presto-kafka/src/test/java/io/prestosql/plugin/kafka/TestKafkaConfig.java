@@ -28,8 +28,8 @@ public class TestKafkaConfig
     @Test
     public void testDefaults()
     {
-        assertRecordedDefaults(recordDefaults(KafkaConfig.class)
-                .setNodes("")
+        assertRecordedDefaults(recordDefaults(KafkaConnectorConfig.class)
+                .setBootstrapServers("")
                 .setKafkaConnectTimeout("10s")
                 .setKafkaBufferSize("64kB")
                 .setDefaultSchema("default")
@@ -53,11 +53,11 @@ public class TestKafkaConfig
                 .put("kafka.messages-per-split", "1")
                 .build();
 
-        KafkaConfig expected = new KafkaConfig()
+        KafkaConnectorConfig expected = new KafkaConnectorConfig()
                 .setTableDescriptionDir(new File("/var/lib/kafka"))
                 .setTableNames("table1, table2, table3")
                 .setDefaultSchema("kafka")
-                .setNodes("localhost:12345, localhost:23456")
+                .setBootstrapServers("localhost:12345, localhost:23456")
                 .setKafkaConnectTimeout("1h")
                 .setKafkaBufferSize("1MB")
                 .setHideInternalColumns(false)

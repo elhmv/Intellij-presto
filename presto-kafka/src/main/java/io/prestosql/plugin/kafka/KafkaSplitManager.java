@@ -18,12 +18,19 @@ import com.google.common.io.CharStreams;
 import io.airlift.log.Logger;
 import io.prestosql.spi.HostAddress;
 import io.prestosql.spi.PrestoException;
-import io.prestosql.spi.connector.*;
+import io.prestosql.spi.connector.ConnectorSession;
+import io.prestosql.spi.connector.ConnectorSplit;
+import io.prestosql.spi.connector.ConnectorSplitManager;
+import io.prestosql.spi.connector.ConnectorSplitSource;
+import io.prestosql.spi.connector.ConnectorTableHandle;
+import io.prestosql.spi.connector.ConnectorTransactionHandle;
+import io.prestosql.spi.connector.FixedSplitSource;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
 import javax.inject.Inject;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,18 +58,17 @@ public class KafkaSplitManager
 {
     private static final Logger log = Logger.get(KafkaSplitManager.class);
 
-    private final String connectorId;
+//    private final String connectorId;
     private final KafkaConsumerManager consumerManager;
     private final int messagesPerSplit;
 
-
     @Inject
-    public <KafkaConnectorId> KafkaSplitManager(
-            String connectorId,
+    public KafkaSplitManager(
+//            String connectorId,
             KafkaConnectorConfig kafkaConnectorConfig,
             KafkaConsumerManager consumerManager)
     {
-        this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
+//        this.connectorId = requireNonNull(connectorId, "connectorId is null").toString();
         this.consumerManager = requireNonNull(consumerManager, "consumerManager is null");
         messagesPerSplit = requireNonNull(kafkaConnectorConfig, "kafkaConnectorConfig is null").getMessagesPerSplit();
 
@@ -109,7 +115,8 @@ public class KafkaSplitManager
                                 range,
                                 leader))
                         .forEach(splits::add);
-                }
+            }
+
             return new FixedSplitSource(splits.build());
         }
         catch (Exception e) { // Catch all exceptions because Kafka library is written in scala and checked exceptions are not declared in method signature.

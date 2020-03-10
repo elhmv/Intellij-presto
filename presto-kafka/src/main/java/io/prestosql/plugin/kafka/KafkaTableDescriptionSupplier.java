@@ -50,7 +50,7 @@ public class KafkaTableDescriptionSupplier
     private final Set<String> tableNames;
 
     @Inject
-    KafkaTableDescriptionSupplier(KafkaConfig kafkaConfig, JsonCodec<KafkaTopicDescription> topicDescriptionCodec)
+    KafkaTableDescriptionSupplier(KafkaConnectorConfig kafkaConfig, JsonCodec<KafkaTopicDescription> topicDescriptionCodec)
     {
         this.topicDescriptionCodec = requireNonNull(topicDescriptionCodec, "topicDescriptionCodec is null");
 

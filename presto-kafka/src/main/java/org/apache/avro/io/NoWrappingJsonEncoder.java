@@ -17,7 +17,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.avro.Schema;
 import org.apache.avro.io.parsing.Symbol;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 

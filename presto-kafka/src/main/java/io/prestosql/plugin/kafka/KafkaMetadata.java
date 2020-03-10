@@ -53,7 +53,7 @@ public class KafkaMetadata
 
     @Inject
     public KafkaMetadata(
-            KafkaConfig kafkaConfig,
+            KafkaConnectorConfig kafkaConfig,
             Supplier<Map<SchemaTableName, KafkaTopicDescription>> kafkaTableDescriptionSupplier)
     {
         requireNonNull(kafkaConfig, "kafkaConfig is null");
