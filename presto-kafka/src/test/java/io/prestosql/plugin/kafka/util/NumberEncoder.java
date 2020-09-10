@@ -11,27 +11,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.prestosql.plugin.kafka.util;
-
-import kafka.serializer.Encoder;
-import kafka.utils.VerifiableProperties;
-
-import java.nio.ByteBuffer;
-
-public class NumberEncoder
-        implements Encoder<Number>
-{
-    @SuppressWarnings("UnusedParameters")
-    public NumberEncoder(VerifiableProperties properties)
-    {
-        // constructor required by Kafka
-    }
-
-    @Override
-    public byte[] toBytes(Number value)
-    {
-        ByteBuffer buf = ByteBuffer.allocate(8);
-        buf.putLong(value == null ? 0L : value.longValue());
-        return buf.array();
-    }
-}
+//package io.prestosql.plugin.kafka.util;
+//
+//import kafka.serializer.Encoder;
+//import kafka.utils.VerifiableProperties;
+//
+//import java.nio.ByteBuffer;
+//
+//public class NumberEncoder
+//        implements Encoder<Number>
+//{
+//    @SuppressWarnings("UnusedParameters")
+//    public NumberEncoder(VerifiableProperties properties)
+//    {
+//        // constructor required by Kafka
+//    }
+//
+//    @Override
+//    public byte[] toBytes(Number value)
+//    {
+//        ByteBuffer buf = ByteBuffer.allocate(8);
+//        buf.putLong(value == null ? 0L : value.longValue());
+//        return buf.array();
+//    }
+//}

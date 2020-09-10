@@ -11,34 +11,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.prestosql.plugin.kafka.util;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kafka.serializer.Encoder;
-import kafka.utils.VerifiableProperties;
-
-import java.io.UncheckedIOException;
-
-public class JsonEncoder
-        implements Encoder<Object>
-{
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @SuppressWarnings("UnusedParameters")
-    public JsonEncoder(VerifiableProperties properties)
-    {
-        // constructor required by Kafka
-    }
-
-    @Override
-    public byte[] toBytes(Object o)
-    {
-        try {
-            return objectMapper.writeValueAsBytes(o);
-        }
-        catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-}
+//package io.prestosql.plugin.kafka.util;
+//
+//import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//import kafka.serializer.;
+//import kafka.utils.VerifiableProperties;
+//
+//import java.io.UncheckedIOException;
+//
+//public class JsonEncoder
+//        implements Encoder<Object>
+//{
+//    private final ObjectMapper objectMapper = new ObjectMapper();
+//
+//    @SuppressWarnings("UnusedParameters")
+//    public JsonEncoder(VerifiableProperties properties)
+//    {
+//        // constructor required by Kafka
+//    }
+//
+//    @Override
+//    public byte[] toBytes(Object o)
+//    {
+//        try {
+//            return objectMapper.writeValueAsBytes(o);
+//        }
+//        catch (JsonProcessingException e) {
+//            throw new UncheckedIOException(e);
+//        }
+//    }
+//}

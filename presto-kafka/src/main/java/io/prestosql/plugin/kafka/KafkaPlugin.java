@@ -18,7 +18,9 @@ import com.google.common.collect.ImmutableList;
 import io.prestosql.spi.Plugin;
 import io.prestosql.spi.connector.ConnectorFactory;
 import io.prestosql.spi.connector.SchemaTableName;
+import io.prestosql.spi.type.ParametricType;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -40,5 +42,11 @@ public class KafkaPlugin
     public synchronized Iterable<ConnectorFactory> getConnectorFactories()
     {
         return ImmutableList.of(new KafkaConnectorFactory(tableDescriptionSupplier));
+    }
+
+    @Override
+    public Iterable<ParametricType> getParametricTypes()
+    {
+        return Collections.emptyList();
     }
 }
