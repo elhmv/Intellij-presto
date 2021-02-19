@@ -16,6 +16,8 @@ package io.prestosql.plugin.kafka;
 import io.prestosql.spi.connector.ColumnMetadata;
 import io.prestosql.spi.type.BigintType;
 import io.prestosql.spi.type.BooleanType;
+import io.prestosql.spi.type.SmallintType;
+import io.prestosql.spi.type.TimestampType;
 import io.prestosql.spi.type.Type;
 
 import java.util.Map;
@@ -48,6 +50,21 @@ public enum KafkaInternalFieldDescription
     PARTITION_OFFSET_FIELD("_partition_offset", BigintType.BIGINT, "Offset for the message within the partition"),
 
     /**
+     * <tt>_segment_start</tt> - Kafka start offset for the segment which contains the current message. This is per-partition.
+     */
+    SEGMENT_START_FIELD("_segment_start", BigintType.BIGINT, "Segment start offset"),
+
+    /**
+     * <tt>_segment_end</tt> - Kafka end offset for the segment which contains the current message. This is per-partition. The end offset is the first offset that is *not* in the segment.
+     */
+    SEGMENT_END_FIELD("_segment_end", BigintType.BIGINT, "Segment end offset"),
+
+    /**
+     * <tt>_segment_count</tt> - Running count of messages in a segment.
+     */
+    SEGMENT_COUNT_FIELD("_segment_count", BigintType.BIGINT, "Running message count per segment"),
+
+    /**
      * <tt>_message_corrupt</tt> - True if the row converter could not read the a message. May be null if the row converter does not set a value (e.g. the dummy row converter does not).
      */
     MESSAGE_CORRUPT_FIELD("_message_corrupt", BooleanType.BOOLEAN, "Message data is corrupt"),
@@ -75,7 +92,17 @@ public enum KafkaInternalFieldDescription
     /**
      * <tt>_key_length</tt> - length in bytes of the key.
      */
-    KEY_LENGTH_FIELD("_key_length", BigintType.BIGINT, "Total number of key bytes");
+    KEY_LENGTH_FIELD("_key_length", BigintType.BIGINT, "Total number of key bytes"),
+
+    /**
+     * <tt>_message_timestamp</tt> - Message Timestamp.
+     */
+    MESSAGE_TIMESTAMP_FIELD("_message_timestamp", TimestampType.TIMESTAMP, "Message Timestamp"),
+
+    /**
+     * <tt>_message_timestamp</tt> - Message Timestamp Type.
+     */
+    MESSAGE_TIMESTAMP_TYPE_FIELD("_message_timestamp_type", SmallintType.SMALLINT, "Message Timestamp Type");
 
     private static final Map<String, KafkaInternalFieldDescription> BY_COLUMN_NAME =
             stream(KafkaInternalFieldDescription.values())
@@ -108,7 +135,7 @@ public enum KafkaInternalFieldDescription
         return columnName;
     }
 
-    private Type getType()
+    public Type getType()
     {
         return type;
     }

@@ -13,35 +13,40 @@
  */
 package io.prestosql.plugin.kafka;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Module;
 import io.prestosql.spi.Plugin;
 import io.prestosql.spi.connector.ConnectorFactory;
+import io.prestosql.spi.connector.SchemaTableName;
+import io.prestosql.spi.type.ParametricType;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
 public class KafkaPlugin
         implements Plugin
 {
-    public static final Module DEFAULT_EXTENSION = binder -> {
-        binder.install(new KafkaConsumerModule());
-    };
+    private Optional<Supplier<Map<SchemaTableName, KafkaTopicDescription>>> tableDescriptionSupplier = Optional.empty();
 
-    private final Module extension;
-
-    public KafkaPlugin()
+    @VisibleForTesting
+    public synchronized void setTableDescriptionSupplier(Supplier<Map<SchemaTableName, KafkaTopicDescription>> tableDescriptionSupplier)
     {
-        this(DEFAULT_EXTENSION);
-    }
-
-    public KafkaPlugin(Module extension)
-    {
-        this.extension = requireNonNull(extension, "extension is null");
+        this.tableDescriptionSupplier = Optional.of(requireNonNull(tableDescriptionSupplier, "tableDescriptionSupplier is null"));
     }
 
     @Override
     public synchronized Iterable<ConnectorFactory> getConnectorFactories()
     {
-        return ImmutableList.of(new KafkaConnectorFactory(extension));
+        return ImmutableList.of(new KafkaConnectorFactory(tableDescriptionSupplier));
+    }
+
+    @Override
+    public Iterable<ParametricType> getParametricTypes()
+    {
+        return Collections.emptyList();
     }
 }

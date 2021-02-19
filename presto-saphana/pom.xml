@@ -203,7 +203,7 @@
             <artifactId>ngdbc</artifactId>
             <version>2.5.49</version>
             <scope>runtime</scope>
-<!--                <systemPath>/Users/elhmv/Downloads/presto-334/presto-saphana/ngdbc-2.5.49.jar</systemPath>-->
+<!--                <systemPath>/Users/elhmv/test-github2/Intellij-presto/presto-saphana/ngdbc-2.5.49.jar</systemPath>-->
         </dependency>
 
 

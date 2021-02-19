@@ -15,9 +15,11 @@ package io.prestosql.plugin.kafka;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
+import io.airlift.log.Logger;
 import io.prestosql.spi.HostAddress;
 import io.prestosql.spi.PrestoException;
 import io.prestosql.spi.connector.ConnectorSession;
+import io.prestosql.spi.connector.ConnectorSplit;
 import io.prestosql.spi.connector.ConnectorSplitManager;
 import io.prestosql.spi.connector.ConnectorSplitSource;
 import io.prestosql.spi.connector.ConnectorTableHandle;
@@ -51,37 +53,45 @@ import static java.util.Objects.requireNonNull;
 public class KafkaSplitManager
         implements ConnectorSplitManager
 {
-    private final KafkaConsumerFactory consumerFactory;
+    private static final Logger log = Logger.get(KafkaSplitManager.class);
+
+    private final KafkaConsumerManager consumerManager;
     private final int messagesPerSplit;
 
     @Inject
-    public KafkaSplitManager(KafkaConsumerFactory consumerFactory, KafkaConfig kafkaConfig)
+    public KafkaSplitManager(KafkaConnectorConfig kafkaConnectorConfig, KafkaConsumerManager consumerManager)
     {
-        this.consumerFactory = requireNonNull(consumerFactory, "consumerManager is null");
-        messagesPerSplit = requireNonNull(kafkaConfig, "kafkaConfig is null").getMessagesPerSplit();
+        this.consumerManager = requireNonNull(consumerManager, "consumerManager is null");
+        messagesPerSplit = requireNonNull(kafkaConnectorConfig, "kafkaConfig is null").getMessagesPerSplit();
     }
 
     @Override
     public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableHandle table, SplitSchedulingStrategy splitSchedulingStrategy)
     {
+        //KafkaTableHandle kafkaTableHandle = convertLayout(layout).getTable();
         KafkaTableHandle kafkaTableHandle = (KafkaTableHandle) table;
-        try (KafkaConsumer<byte[], byte[]> kafkaConsumer = consumerFactory.create()) {
-            List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(kafkaTableHandle.getTopicName());
 
-            List<TopicPartition> topicPartitions = partitionInfos.stream()
+        ImmutableList.Builder<ConnectorSplit> splits = ImmutableList.builder();
+        try (KafkaConsumer<byte[], byte[]> kafkaConsumer = consumerManager.getConsumer(false)) {
+            List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(kafkaTableHandle.getTopicName());
+            List<TopicPartition> topicPartitions = partitionInfoList.stream()
                     .map(KafkaSplitManager::toTopicPartition)
                     .collect(toImmutableList());
-
             Map<TopicPartition, Long> partitionBeginOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
             Map<TopicPartition, Long> partitionEndOffsets = kafkaConsumer.endOffsets(topicPartitions);
-
-            ImmutableList.Builder<KafkaSplit> splits = ImmutableList.builder();
             Optional<String> keyDataSchemaContents = kafkaTableHandle.getKeyDataSchemaLocation()
                     .map(KafkaSplitManager::readSchema);
             Optional<String> messageDataSchemaContents = kafkaTableHandle.getMessageDataSchemaLocation()
                     .map(KafkaSplitManager::readSchema);
-            for (PartitionInfo partitionInfo : partitionInfos) {
-                TopicPartition topicPartition = toTopicPartition(partitionInfo);
+
+            for (PartitionInfo partitionInfo : partitionInfoList) {
+                log.debug("Adding Partition %s/%s", partitionInfo.topic(), partitionInfo.partition());
+                if (partitionInfo.leader() == null) { // Leader election going on...
+                    log.warn("No leader for partition %s/%s found!", partitionInfo.topic(), partitionInfo.partition());
+                    continue;
+                }
+                TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(), partitionInfo.partition());
+//                List<TopicPartition> topicPartitions = ImmutableList.of(topicPartition);
                 HostAddress leader = HostAddress.fromParts(partitionInfo.leader().host(), partitionInfo.leader().port());
                 new Range(partitionBeginOffsets.get(topicPartition), partitionEndOffsets.get(topicPartition))
                         .partition(messagesPerSplit).stream()
@@ -96,6 +106,7 @@ public class KafkaSplitManager
                                 leader))
                         .forEach(splits::add);
             }
+
             return new FixedSplitSource(splits.build());
         }
         catch (Exception e) { // Catch all exceptions because Kafka library is written in scala and checked exceptions are not declared in method signature.

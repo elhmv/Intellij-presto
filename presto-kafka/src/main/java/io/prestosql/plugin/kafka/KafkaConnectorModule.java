@@ -31,7 +31,6 @@ import io.prestosql.spi.type.TypeManager;
 
 import javax.inject.Inject;
 
-import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import static io.airlift.configuration.ConfigBinder.configBinder;
 import static io.airlift.json.JsonBinder.jsonBinder;
 import static io.airlift.json.JsonCodecBinder.jsonCodecBinder;
@@ -43,15 +42,16 @@ public class KafkaConnectorModule
     @Override
     public void configure(Binder binder)
     {
+        binder.bind(KafkaConnector.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorMetadata.class).to(KafkaMetadata.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorSplitManager.class).annotatedWith(ForClassLoaderSafe.class).to(KafkaSplitManager.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorSplitManager.class).to(ClassLoaderSafeConnectorSplitManager.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorRecordSetProvider.class).annotatedWith(ForClassLoaderSafe.class).to(KafkaRecordSetProvider.class).in(Scopes.SINGLETON);
         binder.bind(ConnectorRecordSetProvider.class).to(ClassLoaderSafeConnectorRecordSetProvider.class).in(Scopes.SINGLETON);
-        binder.bind(KafkaConnector.class).in(Scopes.SINGLETON);
 
-        configBinder(binder).bindConfig(KafkaConfig.class);
-        newSetBinder(binder, TableDescriptionSupplier.class).addBinding().toProvider(KafkaTableDescriptionSupplier.class).in(Scopes.SINGLETON);
+        binder.bind(KafkaConsumerManager.class).in(Scopes.SINGLETON);
+
+        configBinder(binder).bindConfig(KafkaConnectorConfig.class);
 
         jsonBinder(binder).addDeserializerBinding(Type.class).to(TypeDeserializer.class);
         jsonCodecBinder(binder).bindJsonCodec(KafkaTopicDescription.class);
@@ -59,7 +59,7 @@ public class KafkaConnectorModule
         binder.install(new DecoderModule());
     }
 
-    private static final class TypeDeserializer
+    public static final class TypeDeserializer
             extends FromStringDeserializer<Type>
     {
         private static final long serialVersionUID = 1L;
